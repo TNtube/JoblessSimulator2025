@@ -13,9 +13,11 @@ public class ChairsManager : MonoBehaviour
     [SerializeField]
     private int chairsNumber = 5;
     
+    public float walkingSpeed = 1f;
+    
     
     List<GameObject> _chairs = new List<GameObject>();
-    List<GameObject> _npcs = new List<GameObject>();
+    List<NPCBehaviour> _npcs = new List<NPCBehaviour>();
     
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -67,47 +69,51 @@ public class ChairsManager : MonoBehaviour
 
     void UpdateNPCsTarget()
     {
+        var position = transform.position;
+        position.y = 0;
         while(_npcs.Count < chairsNumber)
-            _npcs.Add(Instantiate(npcPrefab, transform.position, transform.rotation));
+        {
+            var behaviour = Instantiate(npcPrefab, position, transform.rotation).GetComponent<NPCBehaviour>();
+            behaviour.chairsManager = this;
+            _npcs.Add(behaviour);
+        }
         
         while (_npcs.Count > chairsNumber)
             _npcs.RemoveAt(_npcs.Count - 1);
         
-        var slots = chairsNumber + 1;
-        var angle = 360 / slots;
-        var depth = Vector3.Distance(transform.position, _chairs[0].transform.position);
-
-        int index = 0;
-        foreach (var npc in _npcs)
-        {
-            var rotation = Quaternion.Euler(0, angle * index, 0);
-            var direction = rotation * Vector3.forward;
-            
-            npc.transform.LookAt(transform.position + direction * 100);
-            npc.transform.position = transform.position + direction.normalized * (depth + depth / 3.0f); // magic offset
-            index++;
-        }
+        UpdateNPCsPosition(true);
     }
 
-    void UpdateNPCsPosition()
+    private float _angle = 0;
+
+    void UpdateNPCsPosition(bool setPosition = false)
     {
         var slots = chairsNumber + 1;
         var angle = 360 / slots;
         var depth = Vector3.Distance(transform.position, _chairs[0].transform.position);
 
-        int index = 0;
-        for (int i = 0; i < _npcs.Count; i++)
-        {
-            var rotation = Quaternion.Euler(0, angle * index + Time.time, 0);
-            var direction = rotation * Vector3.forward;
+        _angle += (moveSpeed / (depth+0.1f * Mathf.PI * 2.0f)) * Time.deltaTime;
+        Debug.Log("angle is " + _angle);
+        Debug.Log("depth is " + depth);
 
-            _npcs[i].transform.LookAt(transform.position + direction * 100);
-            _npcs[i].transform.position = transform.position + direction.normalized * (depth + depth / 3.0f); // magic offset
+        int index = 0;
+        foreach (var npc in _npcs)
+        {
+            var rotation = Quaternion.Euler(0, angle * index + _angle, 0);
+            var direction = rotation * Vector3.forward;
+            
+            
+
+            var nextPos = transform.position + direction.normalized * (depth + 1); // magic offset
+            nextPos.y = 0;
+            if (setPosition)
+                npc.transform.position = nextPos;
+            else
+                npc.SetTarget(nextPos);
+
             index++;
         }
     }
-
-    private float _angle = 0.0f;
     
     public float testDepth = 5.0f;
     public float moveSpeed = 1.0f;
@@ -119,12 +125,12 @@ public class ChairsManager : MonoBehaviour
         // angle += (moveSpeed / (radius * Mathf.PI * 2.0f)) * Time.deltaTime
         
         var depth = testDepth;
-        _angle += moveSpeed / (testDepth * Mathf.PI * 2.0f) * Time.deltaTime;
+        // _angle += moveSpeed / (testDepth * Mathf.PI * 2.0f) * Time.deltaTime;
         
         // draw line from center to angle
         for (var i = 0; i < chairsNumber; i++)
         {
-            var rotation = Quaternion.Euler(0, angle * i + _angle, 0);
+            var rotation = Quaternion.Euler(0, angle * i, 0);
             var direction = rotation * Vector3.forward;
 
 
