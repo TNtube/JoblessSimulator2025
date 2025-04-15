@@ -52,7 +52,7 @@ public class ChairsManager : MonoBehaviour
         int index = 0;
         foreach (var chair in _chairs)
         {
-            var bounds = chair.GetComponent<Renderer>().bounds;
+            var bounds = chair.GetComponentInChildren<Renderer>().bounds;
             var b = bounds.size.x;
             var side = b * Mathf.Sin(Mathf.Deg2Rad * baseAngle) / Mathf.Sin(Mathf.Deg2Rad * angle);
             var area = 0.5f * b * side * Mathf.Sin(Mathf.Deg2Rad * baseAngle);
