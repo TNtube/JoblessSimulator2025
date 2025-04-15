@@ -976,7 +976,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chairPrefab: {fileID: 919132149155446097, guid: 1f53a3f9e7f3d0b4cb16366b2db0e5e6, type: 3}
+  npcPrefab: {fileID: 366480770045617868, guid: 7bed91e6b6b3cf748848ae2eb9b138da, type: 3}
   chairsNumber: 10
+  testDepth: 5
+  moveSpeed: 1
 --- !u!1001 &3135190808765373776
 PrefabInstance:
   m_ObjectHideFlags: 0
