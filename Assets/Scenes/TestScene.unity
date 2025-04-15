@@ -2112,8 +2112,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bc72d2ecc8add47b2fe00d40318500, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LeftHand: {fileID: 0}
-  m_RightHand: {fileID: 0}
+  m_LeftHand: {fileID: 361979195}
+  m_RightHand: {fileID: 518295134}
   m_LeftController: {fileID: 0}
   m_RightController: {fileID: 0}
   m_TrackedHandModeStarted:
@@ -2143,8 +2143,8 @@ MonoBehaviour:
   m_camera: {fileID: 1155203509}
   m_currentHeightText: {fileID: 1642536478}
   m_currentStateText: {fileID: 1580205202}
-  m_standingHeight: 0
-  m_crouchingHeight: 0
+  m_standingHeight: 1.75
+  m_crouchingHeight: 1.25
   m_crouchingThreshold: 0
 --- !u!1001 &1025423672
 PrefabInstance:
