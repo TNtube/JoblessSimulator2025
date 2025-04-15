@@ -4,6 +4,7 @@ using UnityEngine;
 public class NPCBehaviour : MonoBehaviour
 {
     private static readonly int WalkSpeed = Animator.StringToHash("WalkSpeed");
+    private static readonly int Sit1 = Animator.StringToHash("Sit");
 
     [SerializeField]
     private Animator animator;
@@ -11,12 +12,15 @@ public class NPCBehaviour : MonoBehaviour
     public ChairsManager chairsManager;
     
     Vector3 _target;
+
+    [SerializeField]
+    private float animationSpeed = .7f;
     
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        animator.SetFloat(WalkSpeed, .7f);
+        animator.SetFloat(WalkSpeed, animationSpeed);
     }
 
     private void OnDrawGizmos()
@@ -37,5 +41,10 @@ public class NPCBehaviour : MonoBehaviour
         // move to the target
         transform.LookAt(_target);
         transform.position = _target;
+    }
+
+    public void Sit()
+    {
+        animator.SetTrigger(Sit1);
     }
 }

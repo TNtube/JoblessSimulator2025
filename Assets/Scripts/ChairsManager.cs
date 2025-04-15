@@ -143,5 +143,13 @@ public class ChairsManager : MonoBehaviour
     void Update()
     {
         UpdateNPCsPosition();
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            foreach (var npc in _npcs)
+            {
+                npc.Sit();
+            }
+        }
     }
 }
