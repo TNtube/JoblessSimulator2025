@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 
 public class ChairsManager : MonoBehaviour
@@ -25,26 +26,28 @@ public class ChairsManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        UpdateChairs();
+        UpdateChairs(true);
         UpdateNPCsTarget();
+    }
+
+    public void RemoveOneChair(Chair chair)
+    {
+        chairsNumber -= 1;
+        _chairs.Remove(chair);
+        Destroy(chair.gameObject);
+        UpdateChairs();
+        
+        // todo: start next round
     }
     
     
-    void UpdateChairs()
+    void UpdateChairs(bool init = false)
     {
         if (_chairs.Count < chairsNumber)
         {
             for (var i = _chairs.Count; i < chairsNumber; i++)
             {
                 _chairs.Add(Instantiate(chairPrefab, transform).GetComponent<Chair>());
-            }
-        }
-        else if (_chairs.Count > chairsNumber)
-        {
-            for (var i = _chairs.Count - 1; i >= chairsNumber; i--)
-            {
-                Destroy(_chairs[i]);
-                _chairs.RemoveAt(i);
             }
         }
         
@@ -54,17 +57,25 @@ public class ChairsManager : MonoBehaviour
         int index = 0;
         foreach (var chair in _chairs)
         {
-            var bounds = chair.ChairRenderer.bounds;
-            var b = bounds.size.x;
+            var b = chair.baseLenght;
             var side = b * Mathf.Sin(Mathf.Deg2Rad * baseAngle) / Mathf.Sin(Mathf.Deg2Rad * angle);
             var area = 0.5f * b * side * Mathf.Sin(Mathf.Deg2Rad * baseAngle);
             var depth = 2 * area / b;
             
             var rotation = Quaternion.Euler(0, angle * index, 0);
             var direction = rotation * Vector3.forward;
-            
-            chair.transform.LookAt(transform.position + direction * 100);
-            chair.transform.position = transform.position + direction.normalized * (depth + depth / 3.0f); // magic offset
+
+            if (init)
+            {
+                chair.transform.LookAt(transform.position + direction * 100);
+                chair.transform.position = transform.position + direction.normalized * (depth + depth / 3.0f); // magic offset
+            }
+            else
+            {
+                chair.transform.DODynamicLookAt(transform.position + direction * 100, 0.3f);
+                chair.transform.DOMove(transform.position + direction.normalized * (depth + depth / 3.0f), 1f);
+
+            }
             index++;
         }
     }

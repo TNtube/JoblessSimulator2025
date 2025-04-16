@@ -74,6 +74,10 @@ public class NPCBehaviour : MonoBehaviour
                 _sittingSequence.Append(transform.DOLookAt(chairPosition, 0.3f));
                 _sittingSequence.AppendCallback(() => animator.SetTrigger(Fail));
                 _sittingSequence.AppendInterval(4.183f);
+                _sittingSequence.AppendCallback(() =>
+                {
+                    chairsManager.RemoveOneChair(chair);
+                });
                 _sittingSequence.Append(transform.DOLookAt(direction * 3, 0.3f));
                 _sittingSequence.Append(transform.DOMove(direction * 3, 5f));
                 _sittingSequence.AppendCallback(() =>
