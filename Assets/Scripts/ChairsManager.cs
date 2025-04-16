@@ -163,6 +163,7 @@ public class ChairsManager : MonoBehaviour
             
             foreach (var npc in _npcs)
             {
+                if (npc.Lost) continue;
                 npc.StartSitting(_chairs[closestChairIndex]);
                 closestChairIndex++;
                 if (closestChairIndex >= _chairs.Count)
