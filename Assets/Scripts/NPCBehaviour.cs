@@ -14,6 +14,7 @@ public class NPCBehaviour : MonoBehaviour
 
     public bool TryingToSit = false;
     public bool Sitting = false;
+    public bool GettingUp = false;
     public bool Lost = false;
     
     public ChairsManager chairsManager;
@@ -60,6 +61,7 @@ public class NPCBehaviour : MonoBehaviour
             animator.SetTrigger(Sit1);
             Sitting = true;
             TryingToSit = false;
+            GettingUp = false;
         });
 
         _sittingSequence.OnUpdate(() =>
@@ -69,7 +71,8 @@ public class NPCBehaviour : MonoBehaviour
                 Lost = true;
                 TryingToSit = false;
                 Sitting = false;
-                _sittingSequence.Kill();
+                GettingUp = false;
+                _sittingSequence.Kill(true);
                 _sittingSequence = DOTween.Sequence();
                 _sittingSequence.Append(transform.DOLookAt(chairPosition, 0.3f));
                 _sittingSequence.AppendCallback(() => animator.SetTrigger(Fail));
@@ -89,6 +92,29 @@ public class NPCBehaviour : MonoBehaviour
         });
 
         _sittingSequence.Play();
+    }
+
+
+    public void StartGettingUp()
+    {
+        if (TryingToSit || GettingUp)
+            return;
+
+        animator.SetTrigger(Sit1);
+        GettingUp = true;
+        Sitting = false;
+        TryingToSit = false;
+        
+        
+        _sittingSequence.Kill(true);
+        _sittingSequence = DOTween.Sequence();
+        _sittingSequence.AppendInterval(2.267f);
+        _sittingSequence.OnComplete(() =>
+        {
+            GettingUp = false;
+        });
+
+
     }
 
     // Update is called once per frame
