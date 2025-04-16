@@ -17,7 +17,6 @@ public class ChairsManager : MonoBehaviour
     
     public float walkingSpeed = 1f;
     
-    
     List<Chair> _chairs = new ();
     public List<Chair> Chairs => _chairs;
     List<NPCBehaviour> _npcs = new ();

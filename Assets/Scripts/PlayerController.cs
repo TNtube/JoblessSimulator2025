@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -7,11 +8,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Camera m_camera;
     [SerializeField] private Text m_currentHeightText;
     [SerializeField] private Text m_currentStateText;
+    [SerializeField] private Text m_onChairText;
     
     [SerializeField] private float m_standingHeight;
     [SerializeField] private float m_crouchingHeight;
     [SerializeField] private float m_crouchingThreshold;
 
+    private bool m_isOnChair = false;
+    
     public void CalibrateStandingHeight()
     {
         m_standingHeight = GetHeight();
@@ -33,15 +37,33 @@ public class PlayerController : MonoBehaviour
     
     public bool IsSitting()
     {
-        return m_camera.transform.position.y < m_crouchingThreshold;
+        return GetHeight() < m_crouchingThreshold && IsOnChair();
     }
-    
-    private void NotUpdate()
+
+    private bool IsOnChair()
+    {
+        return m_isOnChair;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Chair"))
+            m_isOnChair = true;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Chair"))
+            m_isOnChair = false;
+    }
+
+    private void Update()
     {
         if (IsSitting())
-            Debug.Log("Sitting.x");
+            Debug.Log("Sitting.");
 
-        m_currentHeightText.text = GetHeight().ToString();
-        m_currentStateText.text = IsSitting() ? "Crouching" : "Standing";
+        if (m_currentHeightText) m_currentHeightText.text = GetHeight().ToString();
+        if (m_currentStateText) m_currentStateText.text = IsSitting() ? "Crouching" : "Standing";
+        if (m_onChairText) m_onChairText.text = IsOnChair() ? "Yes" : "No";
     }
 }
