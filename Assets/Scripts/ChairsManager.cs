@@ -36,7 +36,12 @@ public class ChairsManager : MonoBehaviour
         Destroy(chair.gameObject);
         UpdateChairs();
         
-        // todo: start next round
+        
+        foreach (var npc in _npcs)
+        {
+            if (npc.Lost) continue;
+            npc.StartGettingUp();
+        }
     }
     
     
@@ -114,6 +119,11 @@ public class ChairsManager : MonoBehaviour
         int index = 0;
         foreach (var npc in _npcs)
         {
+            if (npc.Lost)
+            {
+                index++;
+                continue;
+            }
             var rotation = Quaternion.Euler(0, angle * index + _angle, 0);
             var direction = rotation * Vector3.forward;
 
@@ -178,15 +188,6 @@ public class ChairsManager : MonoBehaviour
                 closestChairIndex++;
                 if (closestChairIndex >= _chairs.Count)
                     closestChairIndex = 0;
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            foreach (var npc in _npcs)
-            {
-                if (npc.Lost) continue;
-                npc.StartGettingUp();
             }
         }
     }
