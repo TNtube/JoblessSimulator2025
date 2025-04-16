@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ChairsManager : MonoBehaviour
@@ -16,8 +17,9 @@ public class ChairsManager : MonoBehaviour
     public float walkingSpeed = 1f;
     
     
-    List<GameObject> _chairs = new List<GameObject>();
-    List<NPCBehaviour> _npcs = new List<NPCBehaviour>();
+    List<Chair> _chairs = new ();
+    public List<Chair> Chairs => _chairs;
+    List<NPCBehaviour> _npcs = new ();
     
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -34,7 +36,7 @@ public class ChairsManager : MonoBehaviour
         {
             for (var i = _chairs.Count; i < chairsNumber; i++)
             {
-                _chairs.Add(Instantiate(chairPrefab, transform));
+                _chairs.Add(Instantiate(chairPrefab, transform).GetComponent<Chair>());
             }
         }
         else if (_chairs.Count > chairsNumber)
@@ -52,7 +54,7 @@ public class ChairsManager : MonoBehaviour
         int index = 0;
         foreach (var chair in _chairs)
         {
-            var bounds = chair.GetComponentInChildren<Renderer>().bounds;
+            var bounds = chair.ChairRenderer.bounds;
             var b = bounds.size.x;
             var side = b * Mathf.Sin(Mathf.Deg2Rad * baseAngle) / Mathf.Sin(Mathf.Deg2Rad * angle);
             var area = 0.5f * b * side * Mathf.Sin(Mathf.Deg2Rad * baseAngle);
@@ -88,21 +90,22 @@ public class ChairsManager : MonoBehaviour
 
     void UpdateNPCsPosition(bool setPosition = false)
     {
+        if (_npcs.Any(npc => npc.Sitting || npc.TryingToSit))
+            return;
+        
         var slots = chairsNumber + 1;
         var angle = 360 / slots;
         var depth = Vector3.Distance(transform.position, _chairs[0].transform.position);
 
-        _angle += (moveSpeed / (depth+0.1f * Mathf.PI * 2.0f)) * Time.deltaTime;
-        Debug.Log("angle is " + _angle);
-        Debug.Log("depth is " + depth);
+        _angle += (walkingSpeed / (depth+0.1f * Mathf.PI * 2.0f)) * Time.deltaTime;
+        // Debug.Log("angle is " + _angle);
+        // Debug.Log("depth is " + depth);
 
         int index = 0;
         foreach (var npc in _npcs)
         {
             var rotation = Quaternion.Euler(0, angle * index + _angle, 0);
             var direction = rotation * Vector3.forward;
-            
-            
 
             var nextPos = transform.position + direction.normalized * (depth + 1); // magic offset
             nextPos.y = 0;
@@ -114,9 +117,6 @@ public class ChairsManager : MonoBehaviour
             index++;
         }
     }
-    
-    public float testDepth = 5.0f;
-    public float moveSpeed = 1.0f;
 
     private void OnDrawGizmos()
     {
@@ -124,7 +124,7 @@ public class ChairsManager : MonoBehaviour
         
         // angle += (moveSpeed / (radius * Mathf.PI * 2.0f)) * Time.deltaTime
         
-        var depth = testDepth;
+        // var depth = testDepth;
         // _angle += moveSpeed / (testDepth * Mathf.PI * 2.0f) * Time.deltaTime;
         
         // draw line from center to angle
@@ -135,7 +135,7 @@ public class ChairsManager : MonoBehaviour
 
 
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, transform.position + direction * depth);
+            Gizmos.DrawLine(transform.position, transform.position + direction * 5);
         }
     }
 
@@ -146,9 +146,27 @@ public class ChairsManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            var firstNpc = _npcs[0];
+            // get the closest chair index to the first npc
+            var closestChairIndex = -1;
+            var closestChairDistance = float.MaxValue;
+            for (var i = 0; i < _chairs.Count; i++)
+            {
+                var distance = Vector3.Distance(firstNpc.transform.position, _chairs[i].transform.position);
+                if (distance < closestChairDistance)
+                {
+                    closestChairDistance = distance;
+                    closestChairIndex = i;
+                }
+            }
+            
+            
             foreach (var npc in _npcs)
             {
-                npc.Sit();
+                npc.StartSitting(_chairs[closestChairIndex]);
+                closestChairIndex++;
+                if (closestChairIndex >= _chairs.Count)
+                    closestChairIndex = 0;
             }
         }
     }

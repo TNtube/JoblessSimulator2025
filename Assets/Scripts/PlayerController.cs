@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
         return m_camera.transform.position.y < m_crouchingThreshold;
     }
     
-    private void Update()
+    private void NotUpdate()
     {
         if (IsSitting())
             Debug.Log("Sitting.x");
