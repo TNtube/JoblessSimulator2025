@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class ChairsManager : MonoBehaviour
 {
@@ -20,13 +22,23 @@ public class ChairsManager : MonoBehaviour
     List<Chair> _chairs = new ();
     public List<Chair> Chairs => _chairs;
     List<NPCBehaviour> _npcs = new ();
-    
+
+    [FormerlySerializedAs("_music")] [SerializeField]
+    private AudioSource _musicSource;
+
+    private float _waveStartTime;
+    private float _waveDuration;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         UpdateChairs(true);
         UpdateNPCsTarget();
+        
+        _musicSource.Play();
+        
+        _waveStartTime = Time.time;
+        _waveDuration = Random.Range(5, 15);
     }
 
     public void RemoveOneChair(Chair chair)
@@ -164,31 +176,40 @@ public class ChairsManager : MonoBehaviour
     {
         UpdateNPCsPosition();
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || Time.time >= _waveStartTime + _waveDuration)
         {
-            var firstNpc = _npcs[0];
-            // get the closest chair index to the first npc
-            var closestChairIndex = -1;
-            var closestChairDistance = float.MaxValue;
-            for (var i = 0; i < _chairs.Count; i++)
+            StartNextWave();
+        }
+    }
+
+    private void StartNextWave()
+    {
+        _waveStartTime = Time.time + 10;
+        _waveDuration = Random.Range(5, 15);
+        _musicSource.Pause();
+        
+        var firstNpc = _npcs[0];
+        // get the closest chair index to the first npc
+        var closestChairIndex = -1;
+        var closestChairDistance = float.MaxValue;
+        for (var i = 0; i < _chairs.Count; i++)
+        {
+            var distance = Vector3.Distance(firstNpc.transform.position, _chairs[i].transform.position);
+            if (distance < closestChairDistance)
             {
-                var distance = Vector3.Distance(firstNpc.transform.position, _chairs[i].transform.position);
-                if (distance < closestChairDistance)
-                {
-                    closestChairDistance = distance;
-                    closestChairIndex = i;
-                }
+                closestChairDistance = distance;
+                closestChairIndex = i;
             }
+        }
             
             
-            foreach (var npc in _npcs)
-            {
-                if (npc.Lost) continue;
-                npc.StartSitting(_chairs[closestChairIndex]);
-                closestChairIndex++;
-                if (closestChairIndex >= _chairs.Count)
-                    closestChairIndex = 0;
-            }
+        foreach (var npc in _npcs)
+        {
+            if (npc.Lost) continue;
+            npc.StartSitting(_chairs[closestChairIndex]);
+            closestChairIndex++;
+            if (closestChairIndex >= _chairs.Count)
+                closestChairIndex = 0;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -8,7 +9,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Camera m_camera;
     [SerializeField] private Text m_currentHeightText;
     [SerializeField] private Text m_currentStateText;
-    [SerializeField] private Text m_onChairText;
     
     [SerializeField] private float m_standingHeight;
     [SerializeField] private float m_crouchingHeight;
@@ -57,13 +57,14 @@ public class PlayerController : MonoBehaviour
             m_isOnChair = false;
     }
 
+    public void StartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+    
     private void Update()
     {
-        if (IsSitting())
-            Debug.Log("Sitting.");
-
         if (m_currentHeightText) m_currentHeightText.text = GetHeight().ToString();
         if (m_currentStateText) m_currentStateText.text = IsSitting() ? "Crouching" : "Standing";
-        if (m_onChairText) m_onChairText.text = IsOnChair() ? "Yes" : "No";
     }
 }
